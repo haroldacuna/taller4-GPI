@@ -1,0 +1,5 @@
+risk_level,num_projects,total_overcrediting,avg_over_rate,total_issued,total_retired,avg_retire_rate
+Bajo,40,172628.28,0.15,1001800.19,353278.57,0.35
+Medio,80,566818.85,0.2,2350688.32,820875.5,0.35
+Alto,26,290499.92,0.29,813842.22,281545.25,0.35
+Muy Alto,4,79213.92,0.33,197212.45,68003.62,0.35

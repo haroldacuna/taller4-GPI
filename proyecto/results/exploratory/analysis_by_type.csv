@@ -1,0 +1,7 @@
+,baseline_tCO2,baseline_tCO2,baseline_tCO2,baseline_tCO2,true_reduction_tCO2,true_reduction_tCO2,true_reduction_tCO2,true_reduction_tCO2,mrv_quality,mrv_quality,mrv_quality,mrv_quality,additionality_score,additionality_score,additionality_score,additionality_score,leakage_rate,leakage_rate,leakage_rate,leakage_rate,permanence_risk,permanence_risk,permanence_risk,permanence_risk
+,mean,median,std,count,mean,median,std,count,mean,median,std,count,mean,median,std,count,mean,median,std,count,mean,median,std,count
+type,,,,,,,,,,,,,,,,,,,,,,,,
+ARR,11111.6712,10337.155,5242.5455,32,4839.9203,3866.91,2563.3257,32,0.5362,0.5377,0.2089,32,0.6077,0.7059,0.2335,32,0.1494,0.1392,0.0753,32,0.4495,0.463,0.2374,32
+Cookstoves,4383.1807,3325.965,3707.341,46,2024.9878,1558.67,2039.3381,46,0.6241,0.6556,0.2201,46,0.5552,0.5668,0.2202,46,0.1177,0.1256,0.076,46,0.2823,0.2882,0.1818,46
+REDD+,26658.1751,20974.18,18188.0702,51,10598.9822,9299.78,7868.7393,51,0.5838,0.6419,0.249,51,0.5012,0.5156,0.2371,51,0.1263,0.1209,0.0758,51,0.4764,0.4643,0.1985,51
+Renewables,4627.6848,3861.41,3453.7592,21,1961.7357,1807.52,1224.5132,21,0.6156,0.6735,0.208,21,0.5798,0.5635,0.1626,21,0.1186,0.1059,0.0862,21,0.3977,0.3658,0.1563,21

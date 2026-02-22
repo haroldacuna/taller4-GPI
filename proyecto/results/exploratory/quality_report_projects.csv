@@ -1,0 +1,15 @@
+column,dtype,non_null_count,null_count,null_pct,unique_count,unique_pct
+project_id,object,150,0,0.0,150,100.0
+country,object,150,0,0.0,6,4.0
+type,object,150,0,0.0,4,2.67
+start_date,datetime64[ns],150,0,0.0,1,0.67
+end_date,datetime64[ns],150,0,0.0,1,0.67
+area_ha,float64,150,0,0.0,150,100.0
+baseline_tCO2,float64,150,0,0.0,150,100.0
+additionality_score,float64,150,0,0.0,149,99.33
+mrv_quality,float64,150,0,0.0,150,100.0
+leakage_rate,float64,150,0,0.0,131,87.33
+permanence_risk,float64,150,0,0.0,149,99.33
+verification_frequency_months,int64,150,0,0.0,3,2.0
+buffer_contribution_rate,float64,150,0,0.0,144,96.0
+true_reduction_tCO2,float64,150,0,0.0,150,100.0
