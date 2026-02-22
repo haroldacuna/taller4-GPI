@@ -1,1 +1,291 @@
-# taller4-GPI
+# Taller 4 GPI
+
+## Descripción General
+
+Este proyecto es un simulador integral de proyectos de carbono que modela la dinámica del mercado de créditos de carbono internacionales. Genera datos realistas de emisión, retiro y precios de créditos de carbono, junto con análisis de riesgo de integridad para diferentes tipos de proyectos.
+
+## Objetivo
+
+Simular y analizar el comportamiento de proyectos de reducción de emisiones de carbono bajo el esquema de Reducción de Emisiones por Deforestación y Degradación (REDD+), Afforestación/Reforestación (ARR), proyectos de cocinas limpias (Cookstoves) y energías renovables (Renewables), considerando aspectos críticos como:
+
+- Adicionalidad y rigor metodológico
+- Riesgos de permanencia y fugas (leakage)
+- Calidad de monitoreo, reporteo y verificación (MRV)
+- Integridad de los créditos emitidos
+- Dinámicas de precios del mercado
+- Retiros de créditos por parte de compradores
+
+## Estructura del Proyecto
+
+```
+proyecto/
+├── data/
+│   ├── raw/                          # Datos generados por la simulación
+│   │   ├── projects.csv              # Características de los 150 proyectos
+│   │   ├── issuance.csv              # Emisión mensual de créditos
+│   │   └── prices.csv                # Precios mensuales del carbono
+│   └── processed/                    # Datos procesados y análisis
+│       ├── project_summary.csv       # Resumen a nivel de proyecto
+│       └── issuance_with_revenue.csv # Ingresos por venta de créditos
+├── results/
+│   ├── figures/                      # Gráficos y visualizaciones
+│   └── tables/
+│       └── top20_high_risk_projects.csv  # Top 20 proyectos de mayor riesgo
+├── scripts/
+│   ├── 01_generate_data.py          # Generación de datos base
+│   ├── 02_analyze.py                # Análisis y procesamiento
+│   └── 03_visualize.py              # Visualizaciones
+├── src/
+│   ├── config.py                    # Parámetros de configuración
+│   ├── data_generation.py           # Lógica de generación de datos
+│   ├── analysis.py                  # Funciones de análisis
+│   └── visualization.py             # Funciones de visualización
+├── environment.yml                  # Dependencias conda
+└── runall.sh                        # Script para ejecutar el flujo completo
+```
+
+## Flujo de Trabajo
+
+El proyecto sigue un flujo de tres etapas:
+
+### 1. **Generación de Datos** (`01_generate_data.py`)
+
+Crea tres conjuntos de datos sintéticos:
+
+#### **projects.csv** (150 proyectos)
+- Identificadores únicos, tipos y ubicaciones geográficas
+- Características físicas: área (hectáreas), baseline de emisiones
+- Indicadores de calidad: adicionalidad, calidad MRV
+- Factores de riesgo: tasa de fugas, riesgo de permanencia
+- Parámetros de verificación: frecuencia, contribución a buffer
+
+#### **issuance.csv** (emisión mensual)
+- Reducción "verdadera" de emisiones (basada en baseline y adicionalidad)
+- Reducción "reportada" (incluye sesgos por baja calidad MRV)
+- Créditos emitidos y retirados
+- Créditos en buffer de permanencia
+- Estimaciones de overcrediting
+- Flags de riesgo de entrega
+
+#### **prices.csv** (precios mensuales)
+- Precios de carbono con tendencia alcista
+- Volatilidad estocástica
+- Shocks ocasionales de mercado
+- Rango realista: USD 2–25 por tonelada de CO₂
+
+### 2. **Análisis** (`02_analyze.py`)
+
+Procesa datos brutos y genera análisis descriptivo:
+
+#### **project_summary.csv**
+Agrega datos a nivel de proyecto:
+- Totales de emisiones verdaderas vs. reportadas
+- Totales de créditos emitidos, retirados y en buffer
+- Tasa de overcrediting (% del reported que es overcredited)
+- Tasa de retiro (% de emitidos que fueron retirados)
+- **Integrity Risk Score**: métrica sintética que combina:
+  - Baja calidad MRV (45% de peso)
+  - Baja adicionalidad (25%)
+  - Riesgo de permanencia (20%)
+  - Tasa de fugas (10%)
+
+#### **issuance_with_revenue.csv**
+Calcula ingresos financieros:
+- Ingresos brutos = créditos retirados × precio del carbono
+- Permite análisis de rentabilidad por mes y proyecto
+
+#### **top20_high_risk_projects.csv**
+Ranking de los 20 proyectos con mayor puntuación de riesgo de integridad.
+
+### 3. **Visualización** (`03_visualize.py`)
+
+Genera gráficos para explorar patrones en:
+- Distribución de riesgos por tipo de proyecto y geografía
+- Evolución de precios y correlación con retiros
+- Tendencias de overcrediting
+- Análisis de cohorte temporal
+
+## Parámetros de Configuración
+
+Los parámetros se definen en `src/config.py`:
+
+```python
+@dataclass(frozen=True)
+class SimConfig:
+    seed: int = 42              # Semilla para reproducibilidad
+    n_projects: int = 150       # Número de proyectos
+    start_month: str = "2020-01-01"  # Fecha de inicio
+    n_months: int = 60          # Duración en meses (5 años)
+```
+
+Puede personalizarse creando una instancia con parámetros diferentes:
+
+```python
+from src.config import SimConfig
+cfg = SimConfig(seed=123, n_projects=200, n_months=120)
+```
+
+## Tipos de Proyectos
+
+El simulador genera cuatro tipos de proyectos con características diferenciadas:
+
+| Tipo | Proporción | Características |
+|------|-----------|-----------------|
+| REDD+ | 35% | Grandes áreas, altos baselines, variable MRV |
+| ARR | 20% | Muy grandes, baselines moderados, buena permanencia |
+| Cookstoves | 25% | Pequeños, adicionalidad moderada, riesgos bajos |
+| Renewables | 20% | Diversos tamaños, buena adicionalidad, riesgos mínimos |
+
+### Distribución Geográfica
+
+Seis países representativos:
+- Colombia, Perú, Brasil (América Latina - REDD+/ARR)
+- México (mixto)
+- Kenya, Indonesia (trópicos remotos)
+
+## Modelos de Simulación
+
+### Reducción Verdadera vs. Reportada
+
+La brecha entre emisiones "verdaderas" reportadas es modelada explícitamente:
+
+- **Verdadera**: `baseline × (0.25 + 0.55×adicionalidad) × (1 - fugas) × (1 - 0.25×permanence_risk)`
+- **Reportada**: `verdadera × (1 + bias_esperado + ruido)`
+  - `bias_esperado = 0.35×(1 - MRV_quality) + 0.20×(1 - adicionalidad) + penalidad_verification`
+
+### Factores de Riesgo
+
+| Factor | Impacto | Modelado |
+|--------|---------|----------|
+| Calidad MRV | ↑ overcrediting | Distribución Beta(2.5, 1.7) |
+| Adicionalidad | ↑ credibilidad | Distribución Beta(2.2, 1.8) |
+| Permanencia | ↑ riesgo futuro | Distribución Beta variable |
+| Fugas | ↓ emisiones netas | N(0.12, 0.08) truncada |
+
+### Créditos y Retiros
+
+- **Emitidos**: 1 tCO2 de reportado = 1 crédito (sin buffer)
+- **Buffer**: Descuento de 5–35% según riesgos combinados
+- **Retiros**: Fracción estocástica de emitidos netos (media 35%)
+
+## Instalación y Uso
+
+### Requisitos
+
+- Python 3.8+
+- conda o miniconda
+
+### Instalación
+
+```bash
+# Clonar o descargar el repositorio
+cd proyecto
+
+# Crear ambiente conda
+conda env create -f environment.yml
+
+# Activar ambiente
+conda activate gpi-carbon
+```
+
+### Ejecución
+
+**Opción 1: Ejecutar el flujo completo**
+
+```bash
+bash runall.sh
+```
+
+**Opción 2: Ejecutar scripts individualmente**
+
+```bash
+# 1. Generar datos crudos
+python scripts/01_generate_data.py
+
+# 2. Análisis y procesamiento
+python scripts/02_analyze.py
+
+# 3. Visualización
+python scripts/03_visualize.py
+```
+
+## Salidas Principales
+
+### CSV Generados
+
+1. **data/raw/**
+   - `projects.csv`: 150 filas × 14 columnas (características de proyectos)
+   - `issuance.csv`: 150 × 60 = 9,000 filas (emisiones mensuales)
+   - `prices.csv`: 60 filas (precios mensuales)
+
+2. **data/processed/**
+   - `project_summary.csv`: 150 filas con resúmenes y riesgos
+   - `issuance_with_revenue.csv`: 9,000 filas con ingresos en USD
+
+3. **results/tables/**
+   - `top20_high_risk_projects.csv`: Top 20 de mayor riesgo
+
+### Gráficos (si están implementados)
+
+Ubicados en `results/figures/`:
+- Distribución de riesgos de integridad
+- Evolución de precios y retiros
+- Correlación entre variables
+
+## Indicadores Clave
+
+### Integrity Risk Score
+
+Métrica compuesta (0–1, donde 1 es máximo riesgo):
+
+$$\text{Score} = 0.45(1 - \text{MRV}_\text{quality}) + 0.25(1 - \text{adicionalidad}) + 0.20 \times \text{permanence\_risk} + 0.10 \times \text{leakage\_rate}$$
+
+### Tasa de Overcrediting
+
+$$\text{Over\\_rate} = \frac{\sum \text{overcrediting\_tCO}_2}{\sum \text{reported\_reduction\_tCO}_2}$$
+
+### Tasa de Retiro
+
+$$\text{Retire\\_rate} = \frac{\sum \text{retired\_credits}}{\sum \text{issued\_credits}}$$
+
+### Ingresos Brutos
+
+$$\text{Revenue (USD)} = \text{retired\_credits} \times \text{monthly\_price}$$
+
+## Limitaciones y Supuestos
+
+1. **Supuestos simplificadores**:
+   - No modela ciclos económicos complejos
+   - Precios generados sintéticamente (no históricos reales)
+   - Retiros son estocásticos sin modelar comportamiento de compradores específico
+
+2. **Restricciones**:
+   - No incluye análisis de leyes o regulaciones
+   - No modela dinámicas de doble conteo
+   - Buffer modelado como descuento simple (no como holdings físicos)
+
+3. **Alcance**:
+   - Enfocado en dinámica de emisión y mercado
+   - No incluye aspectos de adaptación o co-beneficios
+
+## Dependencias
+
+```yaml
+python=3.9
+numpy
+pandas
+matplotlib
+seaborn
+scikit-learn
+```
+
+Ver `environment.yml` para lista completa.
+
+## Autor y Contexto
+
+Taller 4 - Maestría en Gestión de Proyectos de Inversión (GPI)
+Universidad Nacional de Colombia
+
+## Licencia
+
+Código de propósito educativo. Libre para uso académico
