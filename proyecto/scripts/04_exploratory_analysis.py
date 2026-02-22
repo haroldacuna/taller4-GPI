@@ -97,12 +97,12 @@ def main():
     print_section("3. Reporte de calidad de datos")
     
     quality_projects = data_quality_report(projects)
-    print("\n🔍 CALIDAD - PROJECTS:")
+    print("\n🔍 CALIDAD - PROJECTOS:")
     print(quality_projects.to_string())
     quality_projects.to_csv(results_dir / "quality_report_projects.csv", index=False)
     
     quality_summary = data_quality_report(summary)
-    print("\n🔍 CALIDAD - SUMMARY:")
+    print("\n🔍 CALIDAD - RESUMEN:")
     print(quality_summary.to_string())
     quality_summary.to_csv(results_dir / "quality_report_summary.csv", index=False)
     
