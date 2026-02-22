@@ -1,6 +1,11 @@
+#!/usr/bin/env bash
 set -e
 
-python -m pip install -r requirements.txt 2>/dev/null || true
+# Moverse a la carpeta raíz del proyecto (proyecto/)
+cd "$(dirname "$0")"
+
+# Asegurar que proyecto/ esté en el PYTHONPATH para que "import src" funcione
+export PYTHONPATH="$(pwd)"
 
 python scripts/01_generate_data.py
 python scripts/02_analyze.py
