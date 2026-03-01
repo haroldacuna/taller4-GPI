@@ -7,7 +7,7 @@ cd "$(dirname "$0")"
 # Asegurar que proyecto/ esté en el PYTHONPATH para que "import src" funcione
 export PYTHONPATH="$(pwd)"
 
-python scripts/01_generate_data.py
+python scripts/01_download_data.py
 python scripts/02_analyze.py
 python scripts/03_visualize.py
 

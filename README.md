@@ -32,25 +32,26 @@ proyecto/
 │   └── tables/
 │       └── top20_high_risk_projects.csv  # Top 20 proyectos de mayor riesgo
 ├── scripts/
-│   ├── 01_generate_data.py          # Generación de datos base
+│   ├── 01_download_data.py          # Descarga de datos desde Zenodo
 │   ├── 02_analyze.py                # Análisis y procesamiento
 │   └── 03_visualize.py              # Visualizaciones
 ├── src/
 │   ├── config.py                    # Parámetros de configuración
-│   ├── data_generation.py           # Lógica de generación de datos
 │   ├── analysis.py                  # Funciones de análisis
-│   └── visualization.py             # Funciones de visualización
+│   ├── visualization.py             # Funciones de visualización
+│   └── utilidades.py                # Funciones de utilidad
 ├── environment.yml                  # Dependencias conda
-└── runall.sh                        # Script para ejecutar el flujo completo
+├── runall.sh                        # Script bash para ejecutar el flujo completo
+└── runall.ps1                       # Script PowerShell para ejecutar el flujo completo
 ```
 
 ## Flujo de Trabajo
 
 El proyecto sigue un flujo de tres etapas:
 
-### 1. **Generación de Datos** (`01_generate_data.py`)
+### 1. **Descarga de Datos** (`01_download_data.py`)
 
-Crea tres conjuntos de datos sintéticos:
+Descarga los datos raw desde Zenodo (https://doi.org/10.5281/zenodo.18819966):
 
 #### **projects.csv** (150 proyectos)
 - Identificadores únicos, tipos y ubicaciones geográficas
@@ -199,8 +200,8 @@ bash runall.sh
 **Opción 2: Ejecutar scripts individualmente**
 
 ```bash
-# 1. Generar datos crudos
-python scripts/01_generate_data.py
+# 1. Descargar datos desde Zenodo
+python scripts/01_download_data.py
 
 # 2. Análisis y procesamiento
 python scripts/02_analyze.py

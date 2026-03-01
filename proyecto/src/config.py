@@ -23,11 +23,15 @@ class SimConfig:
     modificada después de su creación, asegurando consistencia en los parámetros.
     
     Attributes:
+        zenodo_record_id (str): ID del record en Zenodo con los datos raw.
         seed (int): Semilla aleatoria para reproducibilidad de resultados.
         n_projects (int): Número total de proyectos a simular.
         start_month (str): Fecha de inicio de la simulación en formato "YYYY-MM-DD".
         n_months (int): Duración de la simulación en meses.
     """
+    
+    zenodo_record_id: str = "18819966"
+    """ID del record de Zenodo. Por defecto: 18819966 (https://doi.org/10.5281/zenodo.18819966)"""
     
     seed: int = 42
     """Semilla para el generador de números aleatorios. Por defecto: 42"""
