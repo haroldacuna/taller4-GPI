@@ -29,12 +29,16 @@ proyecto/
 │       └── issuance_with_revenue.csv # Ingresos por venta de créditos
 ├── results/
 │   ├── figures/                      # Gráficos y visualizaciones
-│   └── tables/
+│   ├── exploratory/                  # Resultados de análisis exploratorio (EDA)
+│   └── tables/                       # Tablas de análisis y regresión
 │       └── top20_high_risk_projects.csv  # Top 20 proyectos de mayor riesgo
 ├── scripts/
 │   ├── 01_download_data.py          # Descarga de datos desde Zenodo
 │   ├── 02_analyze.py                # Análisis y procesamiento
-│   └── 03_visualize.py              # Visualizaciones
+│   ├── 03_visualize.py              # Visualizaciones
+│   ├── 04_exploratory_analysis.py   # Análisis exploratorio (EDA)
+│   ├── 05_regression_analysis.py    # Análisis de regresión
+│   └── test_utilidades.py           # Pruebas unitarias
 ├── src/
 │   ├── config.py                    # Parámetros de configuración
 │   ├── analysis.py                  # Funciones de análisis
@@ -47,7 +51,7 @@ proyecto/
 
 ## Flujo de Trabajo
 
-El proyecto sigue un flujo de tres etapas:
+El proyecto sigue un flujo de cinco etapas:
 
 ### 1. **Descarga de Datos** (`01_download_data.py`)
 
@@ -105,6 +109,89 @@ Genera gráficos para explorar patrones en:
 - Evolución de precios y correlación con retiros
 - Tendencias de overcrediting
 - Análisis de cohorte temporal
+
+### 4. **Análisis Exploratorio (EDA)** (`04_exploratory_analysis.py`)
+
+Realiza un análisis exploratorio comprehensivo que incluye:
+
+#### Estadísticas descriptivas detalladas
+- Medidas de tendencia central y dispersión
+- Índices de asimetría (skewness) y curtosis
+- Análisis por variable clave
+
+#### Análisis de correlaciones
+- Correlaciones de Pearson entre variables numéricas
+- Identificación de relaciones significativas
+- Matrices de correlación para proyectos y resúmenes
+
+#### Detección de outliers
+- Identificación sistemática usando IQR (Interquartile Range)
+- Detección en variables críticas: área, baseline, reducciones
+- Resumen de outliers por variable
+
+#### Análisis temporal
+- Series de tiempo mensuales agregadas
+- Promedios móviles (rolling means) de 3 y 6 meses
+- Tendencias de emisión, retiros e ingresos
+
+#### Análisis de riesgo
+- Distribución de proyectos por niveles de riesgo (bajo, medio, alto)
+- Análisis de riesgo por tipo de proyecto
+- Top 20 proyectos con mayor overcrediting
+
+#### Análisis por grupos
+- Análisis segmentado por tipo de proyecto
+- Análisis segmentado por país
+- Estadísticas comparativas entre grupos
+
+#### Reporte de calidad de datos
+- Detección de valores faltantes
+- Identificación de valores atípicos
+- Estadísticas de completitud
+
+#### Salidas generadas (en `results/exploratory/`):
+- `project_statistics.csv` - Estadísticas de proyectos
+- `summary_statistics.csv` - Estadísticas de resumen
+- `correlations_*.csv` - Matrices de correlación
+- `outliers_*.csv` - Outliers por variable
+- `time_series_*.csv` - Series temporales
+- `analysis_by_type.csv` - Análisis por tipo de proyecto
+- `analysis_by_country.csv` - Análisis por país
+- `risk_*.csv` - Análisis de riesgo
+- `quality_report_*.csv` - Reportes de calidad
+
+### 5. **Análisis de Regresión** (`05_regression_analysis.py`)
+
+Entrena múltiples modelos de regresión para predecir métricas clave:
+
+#### Variables objetivo (targets):
+1. **over_rate**: Tasa de sobrecreditación
+2. **integrity_risk_score**: Score de riesgo de integridad
+3. **retire_rate**: Tasa de retiro de créditos
+
+#### Features utilizadas:
+- **Variables de calidad**: mrv_quality, additionality_score, leakage_rate, permanence_risk
+- **Variables de proyecto**: baseline_tCO2, area_ha, verification_frequency_months, buffer_contribution_rate
+
+#### Modelos entrenados:
+- **Regresión Lineal**: Modelos con variables de calidad solamente y con todas las variables
+- **Ridge Regression**: Modelo regularizado para over_rate
+- Comparación sistemática de rendimiento
+
+#### Métricas de evaluación:
+- R² (Coeficiente de determinación)
+- RMSE (Root Mean Squared Error)
+- MAE (Mean Absolute Error)
+- Análisis de residuos
+
+#### Salidas generadas (en `results/tables/`):
+- `regression_coef_*.csv` - Coeficientes de los modelos
+- `regression_metrics_*.csv` - Métricas de rendimiento
+- `regression_predictions_*.csv` - Predicciones vs valores reales
+- `regression_worst_predictions_*.csv` - Peores predicciones por modelo
+- `regression_model_comparison.csv` - Comparación entre modelos
+- `regression_best_by_target.csv` - Mejores modelos por variable objetivo
+- Estadísticas adicionales: correlaciones, frecuencias, pruebas de normalidad
 
 ## Parámetros de Configuración
 
@@ -191,13 +278,26 @@ conda activate gpi-carbon
 
 ### Ejecución
 
-**Opción 1: Ejecutar el flujo completo**
+**Opción 1: Ejecutar el flujo completo (scripts 1-3)**
 
 ```bash
 bash runall.sh
 ```
 
-**Opción 2: Ejecutar scripts individualmente**
+O en PowerShell:
+```powershell
+.\runall.ps1
+```
+
+**Opción 2: Ejecutar flujo completo con análisis avanzado (scripts 1-5)**
+
+```bash
+bash runall.sh
+python scripts/04_exploratory_analysis.py
+python scripts/05_regression_analysis.py
+```
+
+**Opción 3: Ejecutar scripts individualmente**
 
 ```bash
 # 1. Descargar datos desde Zenodo
@@ -208,6 +308,12 @@ python scripts/02_analyze.py
 
 # 3. Visualización
 python scripts/03_visualize.py
+
+# 4. Análisis exploratorio (EDA)
+python scripts/04_exploratory_analysis.py
+
+# 5. Análisis de regresión
+python scripts/05_regression_analysis.py
 ```
 
 ## Salidas Principales
@@ -223,8 +329,30 @@ python scripts/03_visualize.py
    - `project_summary.csv`: 150 filas con resúmenes y riesgos
    - `issuance_with_revenue.csv`: 9,000 filas con ingresos en USD
 
-3. **results/tables/**
-   - `top20_high_risk_projects.csv`: Top 20 de mayor riesgo
+3. **results/exploratory/** (generados por script 04)
+   - `project_statistics.csv`: Estadísticas descriptivas de proyectos
+   - `summary_statistics.csv`: Estadísticas de resumen agregado
+   - `correlations_projects.csv` y `correlations_summary.csv`: Matrices de correlación
+   - `outliers_*.csv`: Outliers detectados por variable (área, baseline, reducciones)
+   - `time_series_*.csv`: Series temporales mensuales y con promedios móviles
+   - `analysis_by_type.csv` y `analysis_by_country.csv`: Análisis por grupos
+   - `risk_*.csv`: Análisis de niveles de riesgo
+   - `quality_report_*.csv`: Reportes de calidad de datos
+   - `top20_overcrediting.csv`: Top 20 proyectos con mayor overcrediting
+
+4. **results/tables/** (generados por scripts 02 y 05)
+   - `top20_high_risk_projects.csv`: Top 20 de mayor riesgo de integridad
+   - `estadisticas_*.csv`: Estadísticas por tipo y país
+   - `correlacion_*.csv`: Correlaciones de Pearson y Spearman
+   - `frecuencias_*.csv`: Distribuciones de frecuencia
+   - `pruebas_normalidad.csv`: Pruebas de normalidad
+   - `regression_coef_*.csv`: Coeficientes de modelos de regresión (9 modelos)
+   - `regression_metrics_*.csv`: Métricas de rendimiento de modelos
+   - `regression_predictions_*.csv`: Predicciones de cada modelo
+   - `regression_worst_predictions_*.csv`: Peores predicciones por modelo
+   - `regression_model_comparison.csv`: Comparación entre modelos
+   - `regression_best_by_target.csv`: Mejor modelo por variable objetivo
+   - `resumen_outliers.csv`: Resumen de outliers detectados
 
 ### Gráficos (si están implementados)
 
@@ -253,6 +381,68 @@ $$\text{Retire\\_rate} = \frac{\sum \text{retired\_credits}}{\sum \text{issued\_
 
 $$\text{Revenue (USD)} = \text{retired\_credits} \times \text{monthly\_price}$$
 
+## Capacidades de Análisis Avanzado
+
+### Análisis Exploratorio (Script 04)
+
+El análisis exploratorio proporciona una comprensión profunda de los datos mediante:
+
+#### Métricas Estadísticas
+- Medidas de tendencia central (media, mediana)
+- Medidas de dispersión (desviación estándar, rango intercuartílico)
+- Índices de forma de distribución (asimetría y curtosis)
+
+#### Análisis de Relaciones
+- Correlaciones lineales (Pearson) entre variables
+- Identificación de variables altamente correlacionadas
+- Matrices de correlación para análisis multivariado
+
+#### Detección de Anomalías
+- Identificación de outliers mediante método IQR
+- Análisis de valores atípicos en variables críticas
+- Resumen de frecuencia de outliers por variable
+
+#### Análisis Temporal
+- Agregaciones mensuales de emisiones, retiros e ingresos
+- Suavizado de series con promedios móviles (3 y 6 meses)
+- Identificación de tendencias y patrones estacionales
+
+#### Segmentación
+- Comparación de métricas entre tipos de proyectos
+- Análisis por país de origen
+- Distribución de riesgo por categorías
+
+### Análisis de Regresión (Script 05)
+
+El análisis de regresión permite predecir y entender los factores que influyen en:
+
+#### Modelos Predictivos
+1. **Predicción de Overcrediting**
+   - Identifica variables que contribuyen a sobrecreditación
+   - Cuantifica el impacto de calidad MRV y adicionalidad
+   - Modelo regularizado (Ridge) para mayor estabilidad
+
+2. **Predicción de Riesgo de Integridad**
+   - Explica factores que componen el riesgo
+   - Evalúa peso relativo de cada componente
+   - Identifica proyectos en alto riesgo
+
+3. **Predicción de Tasa de Retiro**
+   - Analiza qué características favorecen retiros
+   - Evalúa relación entre calidad y demanda
+   - Identifica proyectos más atractivos para compradores
+
+#### Interpretabilidad
+- Coeficientes estandarizados para comparación
+- Análisis de residuos para validar supuestos
+- Identificación de predicciones problemáticas
+- Comparación sistemática entre modelos
+
+#### Validación
+- División train/test (80/20)
+- Múltiples métricas de rendimiento (R², RMSE, MAE)
+- Validación de supuestos de regresión lineal
+
 ## Limitaciones y Supuestos
 
 1. **Supuestos simplificadores**:
@@ -278,6 +468,8 @@ pandas
 matplotlib
 seaborn
 scikit-learn
+scipy
+requests
 ```
 
 Ver `environment.yml` para lista completa.
